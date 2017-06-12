@@ -1,0 +1,8 @@
+{
+    "M5_R2_T5_B5": {
+	"const_maxInt": 5,
+	"const_numRegisters": 2,
+	"const_numTimesteps": 5,
+	"const_numBlocks": 5
+    }
+}

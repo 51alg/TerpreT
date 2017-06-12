@@ -1,0 +1,8 @@
+{
+  "L5_T6_H3_S3": {
+    "numHeadStates": 4,
+    "numTimesteps": 6, 
+    "tapeLength": 5, 
+    "numTapeSymbols": 3
+  }
+}

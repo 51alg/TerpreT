@@ -1,0 +1,93 @@
+[
+  {
+    "batch_name": "train", 
+    "instances": [
+      {
+        "final_is_halted": 1, 
+        "final_tape": [
+          1, 
+          1, 
+          0, 
+          0, 
+          2
+        ], 
+        "initial_tape": [
+          1, 
+          1, 
+          0, 
+          1, 
+          2
+        ]
+      }, 
+      {
+        "final_is_halted": 1, 
+        "final_tape": [
+          0, 
+          1, 
+          0, 
+          1, 
+          2
+        ], 
+        "initial_tape": [
+          0, 
+          1, 
+          1, 
+          0, 
+          2
+        ]
+      }, 
+      {
+        "final_is_halted": 1, 
+        "final_tape": [
+          0, 
+          0, 
+          0, 
+          0, 
+          2
+        ], 
+        "initial_tape": [
+          0,
+          0, 
+          0, 
+          1, 
+          2
+        ]
+      }, 
+      {
+        "final_is_halted": 1, 
+        "final_tape": [
+          0,
+          0,
+          1,
+          1,
+          2
+        ], 
+        "initial_tape": [
+          0, 
+          1, 
+          0, 
+          0, 
+          2
+        ]
+      }, 
+      {
+        "final_is_halted": 1, 
+        "final_tape": [
+          1,
+          0, 
+          1, 
+          1, 
+          2
+        ], 
+        "initial_tape": [
+          1, 
+          1, 
+          0, 
+          0, 
+          2
+        ]
+      }
+    ], 
+    "hypers": "L5_T9_H3_S3"
+  }
+]

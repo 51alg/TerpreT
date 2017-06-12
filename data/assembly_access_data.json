@@ -1,0 +1,28 @@
+[
+    {
+        "batch_name": "train",
+        "hypers": "M5_R2_T5_B5",
+        "instances": [
+            { "initial_envMemory": [1, 4, 2, 1, 0],
+              "final_envMemory_0": 2,
+              "final_block": 0
+            },
+            { "initial_envMemory": [2, 2, 3, 1, 0],
+              "final_envMemory_0": 1,
+              "final_block": 0
+            },
+            { "initial_envMemory": [2, 1, 1, 3, 0],
+              "final_envMemory_0": 3,
+              "final_block": 0
+            },
+            { "initial_envMemory": [1, 4, 3, 1, 0],
+              "final_envMemory_0": 3,
+              "final_block": 0
+            },
+            { "initial_envMemory": [0, 2, 1, 2, 0],
+              "final_envMemory_0": 2,
+              "final_block": 0
+            }
+        ]
+    }
+]

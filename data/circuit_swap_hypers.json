@@ -1,0 +1,7 @@
+{
+    "W3_G3_O2": {
+	"numWires": 3,
+	"numGates": 3,
+        "numOutputs": 2
+    }
+}

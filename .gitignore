@@ -1,0 +1,30 @@
+# No vim/emacs temp:
+*.sw[op]
+*~
+\#*#
+
+# No pickled/generated (debug) data
+*.pkl
+*.mat
+
+# No build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+x64/
+build/
+bld/
+[Bb]in/[Dd]ebug
+[Bb]in/[Rr]elease
+[Oo]bj/
+
+# Don't commit compiled python files or extensions
+*.pyc
+*.pyd
+
+# NuGet Packages Directory
+packages/
+
+# No outputs of compilers/data generators
+data/*json
+compiled/*

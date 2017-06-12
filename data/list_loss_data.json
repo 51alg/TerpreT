@@ -1,0 +1,33 @@
+[
+    {
+        "batch_name": "train",
+        "hypers": "M5_N10",
+        "instances": [
+            {
+                "initial_pos": 0,
+                "outputListVal": [0, 0, 0, 0, 0],
+                "outputListIsDone": [1, 1, 1, 1, 1]
+            },
+            {
+                "initial_pos": 1,
+                "outputListVal": [1, 2, 3, 0, 0],
+                "outputListIsDone": [0, 0, 0, 1, 1]
+            },
+            {
+                "initial_pos": 2,
+                "outputListVal": [2, 3, 0, 0, 0],
+                "outputListIsDone": [0, 0, 1, 1, 1]
+            },
+            {
+                "initial_pos": 3,
+                "outputListVal": [3, 0, 0, 0, 0],
+                "outputListIsDone": [0, 1, 1, 1, 1]
+            },
+            {
+                "initial_pos": 4,
+                "outputListVal": [4, 0, 0, 0, 0],
+                "outputListIsDone": [0, 1, 1, 1, 1]
+            }
+        ]
+    }
+]

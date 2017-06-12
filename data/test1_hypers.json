@@ -1,0 +1,14 @@
+{
+    "T4_M2": {
+	      "const_T": 4,
+	      "const_M": 2
+    },
+    "T6_M2": {
+	      "const_T": 6,
+	      "const_M": 2
+    },
+    "T10_M2": {
+	      "const_T": 10,
+	      "const_M": 2
+    }
+}

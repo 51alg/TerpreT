@@ -1,0 +1,20 @@
+[
+    {
+        "batch_name": "train",
+        "hypers": "W3_G3_O2",
+        "instances": [
+            { "initial_wires": [0, 0, 0],
+              "final_wires": [0, 0]
+            },
+            { "initial_wires": [0, 1, 0],
+              "final_wires": [1, 0]
+            },
+            { "initial_wires": [1, 0, 0],
+              "final_wires": [0, 1]
+            },
+            { "initial_wires": [1, 1, 0],
+              "final_wires": [1, 1]
+            }
+        ]
+    }
+]

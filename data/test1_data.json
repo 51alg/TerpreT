@@ -1,0 +1,41 @@
+[
+    {
+	      "batch_name": "train",
+	      "hypers": "T4_M2",
+	      "instances": [
+            { "initial_tape": [0, 0],
+              "final_tape": 0
+            },
+            { "initial_tape": [1, 1],
+              "final_tape": 1
+            },
+            { "initial_tape": [1, 0],
+              "final_tape": 1
+            }
+	      ]
+    },
+    {
+	      "batch_name": "difficulty2",
+	      "hypers": "T6_M2",
+	      "instances": [
+            { "initial_tape": [0, 0],
+              "final_tape": 0
+            },
+            { "initial_tape": [1, 1],
+              "final_tape": 0
+            },
+            { "initial_tape": [1, 0],
+              "final_tape": 1
+            }
+	      ]
+    },
+    {
+	      "batch_name": "test1",
+	      "hypers": "T4_M2",
+	      "instances": [
+            { "initial_tape": [0, 1],
+              "final_tape": 1
+            }
+	      ]
+    }
+]
