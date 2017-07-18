@@ -117,11 +117,11 @@ def weighted_sum(components, weights, scope=""):
         if not is_batched: w_sum = tf.squeeze(w_sum) # [c]
     return w_sum
 
-def observe(node, observed_value, scope=""):
+def observe(node, observed_value, mask, scope=""):
     with tf.name_scope(scope):
         tmp, is_batched = make_batch_consistent([node, observed_value])
         node = tmp[0]
-        return tf.nn.sparse_softmax_cross_entropy_with_logits(node, observed_value) 
+        return mask * tf.nn.sparse_softmax_cross_entropy_with_logits(node, observed_value)
 
 
 def normalize(value):

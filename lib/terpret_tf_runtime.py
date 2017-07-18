@@ -153,13 +153,13 @@ def weighted_sum(components, weights, scope=""):
     return w_sum
 
 
-def observe(node, observed_value, scope=""):
+def observe(node, observed_value, mask, scope=""):
     with tf.name_scope(scope):
         tmp, is_batched = make_batch_consistent([node, observed_value])
         node = tmp[0]
         # numerically unstable
         SMALL_NUMBER = 1e-10
-        return tf.nn.sparse_softmax_cross_entropy_with_logits(
+        return mask * tf.nn.sparse_softmax_cross_entropy_with_logits(
             tf.log(node + SMALL_NUMBER), observed_value) - SMALL_NUMBER
 
 

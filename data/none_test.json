@@ -1,0 +1,24 @@
+[    
+    {
+	      "batch_name": "train",
+	      "hypers": "my_hypers",
+	      "instances": [
+            { "init_reg": [1, 0],
+              "final_reg": [3, null]
+            },
+            { "init_reg": [2, 0],
+              "final_reg": [6, null]
+            }
+	      ]
+    },
+    {
+	      "batch_name": "test",
+	      "hypers": "my_hypers",
+	      "instances": [
+            { "init_reg": [3, 0],
+              "final_reg": [9, null]
+            }
+	      ]
+    }
+
+]

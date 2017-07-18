@@ -80,19 +80,24 @@ class Trainer(object):
 
     def construct_output_loss_nodes(self, output_nodes):
         output_datas = {}
+        output_masks = {}
         loss_nodes = {}
         for var_name in output_nodes.keys():
             data_var_name = "%s_data" % var_name
+            mask_var_name = "%s_mask" % var_name
             data_node = tf.placeholder(tf.int32, shape=[None], name=data_var_name)
+            mask_node = tf.to_float(tf.placeholder(tf.int32, shape=[None]), name=mask_var_name)
             output_node = output_nodes[var_name]
             output_rank = output_node.get_shape().ndims
             if output_rank == 1:
                 output_node = tf.tile(tf.expand_dims(output_node, 0), [tf.shape(data_node)[0], 1])
-            loss_node = self.tpt.observe(output_node, data_node,
+                mask_node = tf.tile(tf.expand_dims(mask_node, 0), [tf.shape(data_node)[0], 1])
+            loss_node = self.tpt.observe(output_node, data_node, mask_node,
                                          scope="%s_observe" % var_name)
             output_datas[var_name] = data_node
+            output_masks[mask_var_name] = mask_node
             loss_nodes[var_name] = loss_node
-        return (output_datas, loss_nodes)
+        return (output_datas, output_masks, loss_nodes)
 
     def construct_loss(self, output_nodes):
         """
@@ -106,7 +111,7 @@ class Trainer(object):
         by data instances).
 
         """
-        (output_datas, loss_nodes) = self.construct_output_loss_nodes(output_nodes)
+        (output_datas, output_masks, loss_nodes) = self.construct_output_loss_nodes(output_nodes)
 
         avg_losses = []
         for name, loss_node in loss_nodes.iteritems():
@@ -115,7 +120,7 @@ class Trainer(object):
         # sum across variables
         loss = tf.add_n(avg_losses)
         display_loss = loss  # loss to be displayed
-        return loss, display_loss, output_datas, loss_nodes
+        return loss, display_loss, output_datas, output_masks, loss_nodes
 
     def make_optimizer(self):
         if self.train_hypers["optimizer"] == "adam":
@@ -157,7 +162,7 @@ class Trainer(object):
 
             forward_time_start = time.time()
             inputs, outputs = build_graph(self.model)
-            loss, display_loss, output_placeholders, loss_nodes = \
+            loss, display_loss, output_placeholders, mask_placeholders, loss_nodes = \
                 self.construct_loss(outputs)
             print ("done in %.2fs." % (time.time() - forward_time_start))
 
@@ -193,6 +198,7 @@ class Trainer(object):
             placeholders = {}
             placeholders.update(inputs)
             placeholders.update(output_placeholders)
+            placeholders.update(mask_placeholders)
             self.tf_nodes[model_hypers] = {
                 "inputs": inputs,
                 "outputs": outputs,
@@ -236,9 +242,14 @@ class Trainer(object):
         hypers_name, minibatch = self.data.get_random_minibatch(batch_name, minibatch_size)
 
         observed_vals = {}
-        for var_name, vals in minibatch.iteritems():
+        for var_name, val_mask_dict in minibatch.iteritems():
             node = self.tf_nodes[hypers_name]["placeholders"][var_name]
-            observed_vals[node] = vals
+            observed_vals[node] = val_mask_dict["values"]
+
+            mask_node_name = "%s_mask" % var_name
+            if mask_node_name in self.tf_nodes[hypers_name]["placeholders"]:
+                mask_node = self.tf_nodes[hypers_name]["placeholders"][mask_node_name]
+                observed_vals[mask_node] = val_mask_dict["masks"]
 
         return hypers_name, observed_vals
 

@@ -24,6 +24,7 @@ class Data(object):
 
         return new_dict
 
+
     def preprocess_data(self):
         for batch_dict in self.data_json:
             new_instances = []
@@ -52,12 +53,29 @@ class Data(object):
         each variable name to a batched version (an array of values).
         """
         batched_vals = defaultdict(list)
+        none_masks = defaultdict(list)
         for instance_dict in instance_dicts:
             for name, vals in instance_dict.iteritems():
-                batched_vals[name].append(vals)
+                if vals is None:
+                    batched_vals[name].append(0)
+                    none_masks[name].append(0)
+                else:
+                    batched_vals[name].append(vals)
+                    none_masks[name].append(1)
+                #batched_vals[name].append(vals)
+        
+        value_mask_dict = {}
+        
         for name, vals in batched_vals.iteritems():
             batched_vals[name] = np.array(vals)[perm]
-        return batched_vals
+            none_masks[name] = np.array(none_masks[name])[perm]
+
+            value_mask_dict[name] = {
+                "values": batched_vals[name],
+                "masks"  : none_masks[name]
+            }
+
+        return value_mask_dict
 
     def get_random_minibatch(self, batch_name, batch_size):
         hypers_name, instance_list = self.get_batch(batch_name)
@@ -67,5 +85,4 @@ class Data(object):
             perm = perm[:batch_size]
 
         minibatch = self.instance_list_to_batch(instance_list, perm)
-
         return hypers_name, minibatch
