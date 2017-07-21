@@ -51,17 +51,23 @@ type Hyperparams(maxInt : int,
         = Common.inputsToRegistersAndStack self rand ex.inputs
 
       let (outputRegIntVal, outputRegBoolVal, outputListVal, outputListIsDone) =
+        let nullV = System.Nullable ()
+        let nullStack = List.replicate self.StackSize nullV
         match ex.output with
         | ListVal l ->
           let len = List.length l
           let l = List.map (fun x -> x % self.MaxInt) l
-          let paddedList = l @ (List.replicate (self.StackSize - len) 0)
-          let isDoneList = (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
-          (0, 0, paddedList, isDoneList)
+          let paddedList =
+              l @ (List.replicate (self.StackSize - len) 0)
+              |> List.map Nullable
+          let isDoneList =
+              (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
+              |> List.map Nullable
+          (nullV, nullV, paddedList, isDoneList)
         | IntVal i ->
-          (i % self.MaxInt, 0, List.replicate self.StackSize 0, List.replicate self.StackSize 1)
+          (i % self.MaxInt |> Nullable, nullV, nullStack, nullStack)
         | BoolVal b ->
-          (0, (if b then 1 else 0), List.replicate self.StackSize 0, List.replicate self.StackSize 1)
+          (nullV, (if b then 1 else 0) |> Nullable, nullStack, nullStack)
       
       {
           inputRegPtrVal =   inputRegPtrVals

@@ -62,18 +62,27 @@ type Hyperparams(maxScalar : int,
             else
               yield 0]
       let (outputRegVal, outputListVal, outputListIsDone) =
+        let null' = System.Nullable ()
         match ex.output with
         | ListVal l ->
           let len = List.length l
           let l = List.map (fun x -> x % self.MaxInt) l
-          let paddedList = l @ (List.replicate (self.StackSize - len) 0)
-          let isDoneList = (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
-          (0, paddedList, isDoneList)
+          let paddedList =
+              l @ (List.replicate (self.StackSize - len) 0)
+              |> List.map Nullable
+          let isDoneList =
+              (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
+              |> List.map Nullable
+          (null', paddedList, isDoneList)
         | IntVal i ->
-          (i % self.MaxInt, List.replicate self.StackSize 0, List.replicate self.StackSize 1)
+          (i % self.MaxInt |> Nullable,
+           List.replicate self.StackSize null',
+           List.replicate self.StackSize null')
         | BoolVal b ->
-          ((if b then 1 else 0), List.replicate self.StackSize 0, List.replicate self.StackSize 1)
-      
+          ((if b then 1 else 0) |> Nullable,
+           List.replicate self.StackSize null',
+           List.replicate self.StackSize null')
+
       {
           inputRegVal  =     regScalarVals
           inputStackCarVal = stackCarVal

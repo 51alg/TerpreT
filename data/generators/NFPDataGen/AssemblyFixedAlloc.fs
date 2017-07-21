@@ -59,17 +59,21 @@ type Hyperparams(inputNum : int,
             else
               yield 0]
       let (outputRegVal, outputListVal, outputListIsDone) =
+        let nullV = System.Nullable ()
+        let nullStack = List.replicate self.StackSize nullV
         match ex.output with
         | ListVal l ->
           let len = List.length l
           let l = List.map (fun x -> x % self.MaxInt) l
-          let paddedList = l @ (List.replicate (self.StackSize - len) 0)
-          let isDoneList = (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
-          (0, paddedList, isDoneList)
-        | IntVal i ->
-          (i % self.MaxInt, List.replicate self.StackSize 0, List.replicate self.StackSize 1)
-        | BoolVal b ->
-          ((if b then 1 else 0), List.replicate self.StackSize 0, List.replicate self.StackSize 1)
+          let paddedList =
+              l @ (List.replicate (self.StackSize - len) 0)
+              |> List.map Nullable
+          let isDoneList =
+              (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
+              |> List.map Nullable
+          (nullV, paddedList, isDoneList)
+        | IntVal i -> (i % self.MaxInt |> Nullable, nullStack, nullStack)
+        | BoolVal b -> ((if b then 1 else 0) |> Nullable, nullStack, nullStack)
       
       {
           inputRegVal  =     regScalarVals
