@@ -20,7 +20,6 @@ type NFPExampleInstance = {
     expectListOutput : int
     outputRegVal : Nullable<int>
     outputListVal : Nullable<int> seq
-    outputListIsDone : Nullable<int> seq
     outputTermState : int
 }
 
@@ -35,7 +34,6 @@ type TypedNFPExampleInstance = {
     outputRegIntVal : Nullable<int>
     outputRegBoolVal : Nullable<int>
     outputListVal : Nullable<int> seq
-    outputListIsDone : Nullable<int> seq
     outputTermState : int    
 }
 

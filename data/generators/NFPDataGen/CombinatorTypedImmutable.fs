@@ -50,24 +50,17 @@ type Hyperparams(maxInt : int,
       let (inputRegPtrVals, inputRegIntVals, inputRegBoolVals, stackIntVal, stackPtrVal)
         = Common.inputsToRegistersAndStack self rand ex.inputs
 
-      let (outputRegIntVal, outputRegBoolVal, outputListVal, outputListIsDone) =
+      let (outputRegIntVal, outputRegBoolVal, outputListVal) =
         let nullV = System.Nullable ()
         let nullStack = List.replicate self.StackSize nullV
         match ex.output with
         | ListVal l ->
           let len = List.length l
-          let l = List.map (fun x -> x % self.MaxInt) l
-          let paddedList =
-              l @ (List.replicate (self.StackSize - len) 0)
-              |> List.map Nullable
-          let isDoneList =
-              (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
-              |> List.map Nullable
-          (nullV, nullV, paddedList, isDoneList)
-        | IntVal i ->
-          (i % self.MaxInt |> Nullable, nullV, nullStack, nullStack)
-        | BoolVal b ->
-          (nullV, (if b then 1 else 0) |> Nullable, nullStack, nullStack)
+          let l = List.map (fun x -> x % self.MaxInt |> Nullable) l
+          let paddedList = l @ (List.replicate (self.StackSize - len) nullV)
+          (nullV, nullV, paddedList)
+        | IntVal i -> (i % self.MaxInt |> Nullable, nullV, nullStack)
+        | BoolVal b -> (nullV, (if b then 1 else 0) |> Nullable, nullStack)
       
       {
           inputRegPtrVal =   inputRegPtrVals
@@ -80,7 +73,6 @@ type Hyperparams(maxInt : int,
           outputRegIntVal =  outputRegIntVal
           outputRegBoolVal = outputRegBoolVal
           outputListVal =    outputListVal
-          outputListIsDone = outputListIsDone
           outputTermState = 1
       } :> _
 
