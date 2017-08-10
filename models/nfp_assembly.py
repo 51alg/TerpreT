@@ -20,11 +20,9 @@ inputStackCarVal = Input(maxScalar)[inputStackSize]
 inputStackCdrVal = Input(maxScalar)[inputStackSize]
 
 # Outputs
-expectListOutput = Input(2)
 outputTermState = Output(2)
 outputRegVal = Output(maxScalar)
 outputListVal = Output(maxScalar)[maxScalar]
-outputListIsDone = Output(2)[maxScalar]
 
 # Runtime state
 stackCarValue = Var(maxScalar)[numTimesteps + 1, mutableStackSize]
@@ -238,32 +236,20 @@ for t in range(numTimesteps):  # !! factor: numTimesteps
 outputTermState.set_to(isHalted[numTimesteps])
 
 outputListCopyPos = Var(maxScalar)[maxScalar + 1]
-if expectListOutput == 0:
-    # Copy register value to output:
-    outputRegVal.set_to(returnValue[numTimesteps])
-    # Set list output bits to default values:
-    for n in range(maxScalar):
-        outputListIsDone[n].set_to(1)
-        outputListVal[n].set_to(0)
-elif expectListOutput == 1:
-    # Set output register value to default:
-    outputRegVal.set_to(0)
-    # Copy list values out:
-    outputListCopyPos[0].set_to(returnValue[numTimesteps])
-    for n in range(maxScalar):
-        outputListIsDone[n].set_to(ScalarIsZero(outputListCopyPos[n]))
-        if outputListIsDone[n] == 1:
+
+# Copy register value to output:
+outputRegVal.set_to(returnValue[numTimesteps])
+
+# Copy list values out:
+outputListCopyPos[0].set_to(returnValue[numTimesteps])
+for n in range(maxScalar):
+    with outputListCopyPos[n] as p:
+        if p == 0:
             outputListVal[n].set_to(0)
             outputListCopyPos[n + 1].set_to(0)
-
-        elif outputListIsDone[n] == 0:
-            with outputListCopyPos[n] as p:
-                if p == 0:
-                    outputListVal[n].set_to(0)
-                    outputListCopyPos[n + 1].set_to(0)
-                elif p <= inputStackSize:
-                    outputListVal[n].set_to(inputStackCarVal[p - 1])
-                    outputListCopyPos[n + 1].set_to(inputStackCdrVal[p - 1])
-                else:
-                    outputListVal[n].set_to(stackCarValue[numTimesteps, p - inputStackSize - 1])
-                    outputListCopyPos[n + 1].set_to(stackCdrValue[numTimesteps, p - inputStackSize - 1])
+        elif p <= inputStackSize:
+            outputListVal[n].set_to(inputStackCarVal[p - 1])
+            outputListCopyPos[n + 1].set_to(inputStackCdrVal[p - 1])
+        else:
+            outputListVal[n].set_to(stackCarValue[numTimesteps, p - inputStackSize - 1])
+            outputListCopyPos[n + 1].set_to(stackCdrValue[numTimesteps, p - inputStackSize - 1])

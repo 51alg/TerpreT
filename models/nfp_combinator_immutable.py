@@ -35,10 +35,8 @@ inputStackCarVal = Input(maxScalar)[inputStackSize]
 inputStackCdrVal = Input(stackSize)[inputStackSize]
 
 #### Outputs:
-expectListOutput = Input(2)
 outputRegVal = Output(maxScalar)
 outputListVal = Output(maxScalar)[stackSize]
-outputListIsDone = Output(2)[stackSize]
 outputTermState = Output(2)
 
 #### Execution model description
@@ -487,28 +485,15 @@ for i in range(suffixLength):
 
 
 outputTermState.set_to(1)
-if expectListOutput == 0:
-    # Copy register to output:
-    with programReturnReg as outputRegIndex:
-        outputRegVal.set_to(regVal[outputRegIndex])
-    # Set list output bits to default values:
-    for n in range(stackSize):
-        outputListIsDone[n].set_to(1)
-        outputListVal[n].set_to(0)
-elif expectListOutput == 1:
-    # Set output register value to default:
-    outputRegVal.set_to(0)
-    # Copy list values out:
-    outputListCopyPos = Var(stackSize)[stackSize + 1]
-    with programReturnReg as outputRegIndex:
-        outputListCopyPos[0].set_to(regVal[outputRegIndex])
-    for n in range(stackSize):
-        outputListIsDone[n].set_to(PtrIsNull(outputListCopyPos[n], stackSize))
-        if outputListIsDone[n] == 1:
-            outputListVal[n].set_to(0)
-            outputListCopyPos[n + 1].set_to(0)
+# Copy register to output:
+with programReturnReg as outputRegIndex:
+    outputRegVal.set_to(regVal[outputRegIndex])
 
-        elif outputListIsDone[n] == 0:
-            with outputListCopyPos[n] as p:
-                outputListVal[n].set_to(stackCarVal[p])
-                outputListCopyPos[n + 1].set_to(stackCdrVal[p])
+# Copy list values out:
+outputListCopyPos = Var(stackSize)[stackSize + 1]
+with programReturnReg as outputRegIndex:
+    outputListCopyPos[0].set_to(regVal[outputRegIndex])
+for n in range(stackSize):
+    with outputListCopyPos[n] as p:
+        outputListVal[n].set_to(stackCarVal[p])
+        outputListCopyPos[n + 1].set_to(stackCdrVal[p])

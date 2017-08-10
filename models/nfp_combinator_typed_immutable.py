@@ -37,11 +37,9 @@ inputStackCarVal = Input(maxInt)[inputStackSize]
 inputStackCdrVal = Input(stackSize)[inputStackSize]
 
 #### Outputs:
-expectListOutput = Input(2)
 outputRegIntVal = Output(maxInt)
 outputRegBoolVal = Output(2)
 outputListVal = Output(maxInt)[stackSize]
-outputListIsDone = Output(2)[stackSize]
 outputTermState = Output(2)
 
 #### Execution model description
@@ -629,30 +627,17 @@ for i in range(suffixLength):
 
 
 outputTermState.set_to(1)
-if expectListOutput == 0:
-    # Copy register to output:
-    with programReturnReg as outputRegIndex:
-        outputRegIntVal.set_to(regIntVal[outputRegIndex])
-        outputRegBoolVal.set_to(regBoolVal[outputRegIndex])
-    # Set list output bits to default values:
-    for n in range(stackSize):
-        outputListIsDone[n].set_to(1)
-        outputListVal[n].set_to(0)
-elif expectListOutput == 1:
-    # Set output register value to default:
-    outputRegIntVal.set_to(0)
-    outputRegBoolVal.set_to(0)
-    # Copy list values out:
-    outputListCopyPos = Var(stackSize)[stackSize + 1]
-    with programReturnReg as outputRegIndex:
-        outputListCopyPos[0].set_to(regPtrVal[outputRegIndex])
-    for n in range(stackSize):
-        outputListIsDone[n].set_to(PtrIsNull(outputListCopyPos[n], stackSize))
-        if outputListIsDone[n] == 1:
-            outputListVal[n].set_to(0)
-            outputListCopyPos[n + 1].set_to(0)
 
-        elif outputListIsDone[n] == 0:
-            with outputListCopyPos[n] as p:
-                outputListVal[n].set_to(stackCarVal[p])
-                outputListCopyPos[n + 1].set_to(stackCdrVal[p])
+# Copy register to output:
+with programReturnReg as outputRegIndex:
+    outputRegIntVal.set_to(regIntVal[outputRegIndex])
+    outputRegBoolVal.set_to(regBoolVal[outputRegIndex])
+
+# Copy list values out:
+outputListCopyPos = Var(stackSize)[stackSize + 1]
+with programReturnReg as outputRegIndex:
+    outputListCopyPos[0].set_to(regPtrVal[outputRegIndex])
+for n in range(stackSize):
+    with outputListCopyPos[n] as p:
+        outputListVal[n].set_to(stackCarVal[p])
+        outputListCopyPos[n + 1].set_to(stackCdrVal[p])

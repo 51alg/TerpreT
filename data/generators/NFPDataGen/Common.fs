@@ -17,7 +17,6 @@ type NFPExampleInstance = {
     inputStackCarVal : int seq
     inputStackCdrVal : int seq
 
-    expectListOutput : int
     outputRegVal : Nullable<int>
     outputListVal : Nullable<int> seq
     outputTermState : int
@@ -30,7 +29,6 @@ type TypedNFPExampleInstance = {
     inputStackCarVal : int seq
     inputStackCdrVal : int seq
 
-    expectListOutput : int
     outputRegIntVal : Nullable<int>
     outputRegBoolVal : Nullable<int>
     outputListVal : Nullable<int> seq

@@ -69,7 +69,6 @@ type Hyperparams(maxInt : int,
           inputStackCarVal = stackIntVal
           inputStackCdrVal = stackPtrVal
 
-          expectListOutput = match ex.output with | ListVal _ -> 1 | _ -> 0
           outputRegIntVal =  outputRegIntVal
           outputRegBoolVal = outputRegBoolVal
           outputListVal =    outputListVal
