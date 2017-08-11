@@ -110,7 +110,7 @@ class CustomTrainer(Trainer):
         return total_entropy           
 
     def construct_loss(self, output_nodes):
-        loss, display_loss, output_datas, loss_nodes = super(CustomTrainer, self).construct_loss(output_nodes)
+        loss, display_loss, output_datas, output_masks, loss_nodes = super(CustomTrainer, self).construct_loss(output_nodes)
 
         # Entropy
         if CustomTrainer.ENTROPY in self.train_hypers:
@@ -123,7 +123,7 @@ class CustomTrainer(Trainer):
             display_loss = loss
             loss = loss - weighted_entropy
         
-        return loss, display_loss, output_datas, loss_nodes
+        return loss, display_loss, output_datas, output_masks, loss_nodes
 
     def param_init_function(self, size):
         if CustomTrainer.INIT_SCALE in self.train_hypers:
