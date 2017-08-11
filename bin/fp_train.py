@@ -47,9 +47,9 @@ class FPTrainer(CustomTrainer):
                }
 
     def __init__(self, model, model_module, model_hypers, train_hypers, data,
-                 do_debug=False, make_log=False):
+                 seed=0, do_debug=False, make_log=False):
         super(FPTrainer, self).__init__(model, model_module, model_hypers, train_hypers, data,
-                                        do_debug=do_debug, make_log=make_log)
+                                        seed=seed, do_debug=do_debug, make_log=make_log)
 
     def construct_output_loss_nodes(self, output_nodes):
         output_datas = {}
