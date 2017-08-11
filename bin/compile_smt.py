@@ -77,6 +77,9 @@ def compile_smt(model_filename, hypers_filename, data_filename,
 
     out_file_name = os.path.join(out_dir, out_name + ".smt2")
     print "Writing SMTLIB2 benchmark info to '%s'." % out_file_name
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
+
     solver = Solver()
     idx = 0
     for c in constraints:
