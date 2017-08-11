@@ -715,6 +715,9 @@ class TFCompiler():
             print unparse(u.get_class_node(module_node))
 
         filename = source_filename.split("/")[-1].replace(".py", "")
+
+        if not os.path.isdir(out_directory):
+            os.makedirs(out_directory)
         result_filename = os.path.join(out_directory, "%s_compiled.py" % result_filename)
         print "Outputting to %s" % result_filename
         with open(result_filename, 'w') as f:
