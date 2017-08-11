@@ -53,11 +53,14 @@ def compile_smt(model_filename, hypers_filename, data_filename,
         z3compiler = ToZ3ConstraintsVisitor(tag="__ex%i" % idx, variables_to_tag=input_dependents)
         constraints.extend(z3compiler.visit(unrolled_parsed_model))
         for var_name, vals in i.iteritems():
-            if isinstance(vals, list):
+            if vals is None:
+                pass
+            elif isinstance(vals, list):
                 for i, val in enumerate(vals):
-                    var_name_item = "%s_%s" % (var_name, i)
-                    constraints.append(
-                        z3compiler.get_expr(var_name_item) == IntVal(val))
+                    if val is not None:
+                        var_name_item = "%s_%s" % (var_name, i)
+                        constraints.append(
+                            z3compiler.get_expr(var_name_item) == IntVal(val))
             else:
                 constraints.append(
                     z3compiler.get_expr(var_name) == IntVal(vals))
