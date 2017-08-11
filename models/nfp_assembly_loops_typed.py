@@ -43,7 +43,6 @@ outputRegIntVal = Output(maxInt)
 outputRegPtrVal = Var(stackSize) #Data structure output is special, see end of file
 outputRegBoolVal = Output(2)
 outputListVal = Output(maxInt)[stackSize]
-outputListIsDone = Output(2)[stackSize]
 
 #### Execution model description
 ## Loops: foreach in l, foreach in zip l1, l2
@@ -560,12 +559,6 @@ outputListCopyPos = Var(stackSize)[stackSize + 1]
 outputListCopyPos[0].set_to(outputRegPtrVal)
 
 for n in range(stackSize):
-    outputListIsDone[n].set_to(PtrIsNull(outputListCopyPos[n], stackSize))
-    if outputListIsDone[n] == 1:
-        outputListVal[n].set_to(0)
-        outputListCopyPos[n + 1].set_to(0)
-
-    elif outputListIsDone[n] == 0:
-        with outputListCopyPos[n] as p:
-            outputListVal[n].set_to(stackIntVal[p])
-            outputListCopyPos[n + 1].set_to(stackPtrVal[p])
+    with outputListCopyPos[n] as p:
+        outputListVal[n].set_to(stackIntVal[p])
+        outputListCopyPos[n + 1].set_to(stackPtrVal[p])

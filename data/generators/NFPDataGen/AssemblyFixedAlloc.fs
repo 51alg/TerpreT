@@ -58,29 +58,29 @@ type Hyperparams(inputNum : int,
               yield regBoolVal
             else
               yield 0]
-      let (outputRegVal, outputListVal, outputListIsDone) =
+      let (outputRegVal, outputListVal) =
+        let nullV = System.Nullable ()
+        let nullStack = List.replicate self.StackSize nullV
         match ex.output with
         | ListVal l ->
           let len = List.length l
-          let l = List.map (fun x -> x % self.MaxInt) l
-          let paddedList = l @ (List.replicate (self.StackSize - len) 0)
-          let isDoneList = (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
-          (0, paddedList, isDoneList)
-        | IntVal i ->
-          (i % self.MaxInt, List.replicate self.StackSize 0, List.replicate self.StackSize 1)
-        | BoolVal b ->
-          ((if b then 1 else 0), List.replicate self.StackSize 0, List.replicate self.StackSize 1)
+          let l = List.map (fun x -> x % self.MaxInt |> Nullable) l
+          let paddedList = l @ (List.replicate (self.StackSize - len) nullV)
+          let isDoneList =
+              (List.replicate len 0) @ (List.replicate (self.StackSize - len) 1)
+              |> List.map Nullable
+          (nullV, paddedList)
+        | IntVal i -> (i % self.MaxInt |> Nullable, nullStack)
+        | BoolVal b -> ((if b then 1 else 0) |> Nullable, nullStack)
       
       {
           inputRegVal  =     regScalarVals
           inputStackCarVal = stackCarVal
           inputStackCdrVal = stackCdrVal
 
-          expectListOutput = match ex.output with | ListVal _ -> 1 | _ -> 0
           outputTermState =  1
           outputRegVal =     outputRegVal
           outputListVal =    outputListVal
-          outputListIsDone = outputListIsDone
       } :> _
 
 
