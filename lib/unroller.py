@@ -196,14 +196,14 @@ def inline_assigns_and_unroll_fors_and_withs(root):
             # Record inlinable functions, and do not visit them:
             if len(node.decorator_list) == 1 and node.decorator_list[0].func.id == "Inline":
                 self.__inlinable_functions[node.name] = node
-#            else:
-#                # Spawn off sub-visitor initialised with current environment,
-#                # but its own scope, and remove arguments:
-#                subEnvironment = copy.copy(self.__environment)
-#                for arg in node.args.args:
-#                    subEnvironment.pop(arg.id, None)
-#                subVisitor = Transformer(subEnvironment, self.__inlinable_functions)
-#                node = subVisitor.generic_visit(node)
+            else:
+                # Spawn off sub-visitor initialised with current environment,
+                # but its own scope, and remove arguments:
+                subEnvironment = copy.copy(self.__environment)
+                for arg in node.args.args:
+                    subEnvironment.pop(arg.id, None)
+                subVisitor = Transformer(subEnvironment, self.__inlinable_functions)
+                node = subVisitor.generic_visit(node)
 
             return node
 
@@ -318,15 +318,19 @@ def inline_assigns_and_unroll_fors_and_withs(root):
                         last_if.orelse = [current_if]
 
                 # Do our deed:
-                (checked_var, checked_value) = get_name_and_const_from_test(current_if.test)
-                checked_vars.add(checked_var)
-                checked_values.add(checked_value)
-                # Look at the next elif:
-                if len(current_if.orelse) == 1 and isinstance(current_if.orelse[0], ast.If):
-                    last_if = current_if
-                    current_if = current_if.orelse[0]
-                else:
-                    break
+                try:
+                    (checked_var, checked_value) = get_name_and_const_from_test(current_if.test)
+                    checked_vars.add(checked_var)
+                    checked_values.add(checked_value)
+                    # Look at the next elif:
+                    if len(current_if.orelse) == 1 and isinstance(current_if.orelse[0], ast.If):
+                        last_if = current_if
+                        current_if = current_if.orelse[0]
+                    else:
+                        break
+                except:
+                    # This may happen if we couldn't cleanly identify the else case. For this, just leave things as they are:
+                    return node
 
             # We need to stringify them, to not be confused by several instances refering to the same thing:
             checked_var_strs = set(astunparse.unparse(var) for var in checked_vars)
