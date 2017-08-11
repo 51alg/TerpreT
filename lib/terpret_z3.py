@@ -134,9 +134,9 @@ class ToZ3ExprVisitor(ast.NodeVisitor):
                 return left_term * right_term
             elif isinstance(node.op, ast.BitXor):
                 # Special-case for bool circuit-examples:
-                if left_term.is_int():
+                if is_is_int(left_term):
                     left_term = left_term == IntVal(1)
-                if right_term.is_int():
+                if is_is_int(right_term):
                     right_term = right_term == IntVal(1)
                 return left_term != right_term
             else:
@@ -161,9 +161,9 @@ class ToZ3ExprVisitor(ast.NodeVisitor):
         right_term = self.visit(node.values[1])
 
         # Special-case for bool circuit-examples:
-        if left_term.is_int():
+        if is_is_int(left_term):
             left_term = left_term == IntVal(1)
-        if right_term.is_int():
+        if is_is_int(right_term):
             right_term = right_term == IntVal(1)
 
         if isinstance(node.op, ast.And):
@@ -187,7 +187,7 @@ class ToZ3ExprVisitor(ast.NodeVisitor):
             if isinstance(node.op, ast.USub):
                 return -term
             elif isinstance(node.op, ast.Not):
-                if term.is_int():
+                if is_is_int(term):
                     term = term == IntVal(1)
                 return Not(term)
             else:
