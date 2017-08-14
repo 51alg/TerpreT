@@ -80,24 +80,25 @@ class Trainer(object):
 
     def construct_output_loss_nodes(self, output_nodes):
         output_datas = {}
-        output_masks = {}
+        output_mask_placeholders = {}
         loss_nodes = {}
         for var_name in output_nodes.keys():
             data_var_name = "%s_data" % var_name
             mask_var_name = "%s_mask" % var_name
             data_node = tf.placeholder(tf.int32, shape=[None], name=data_var_name)
-            mask_node = tf.to_float(tf.placeholder(tf.int32, shape=[None]), name=mask_var_name)
+            mask_node_placeholder = tf.to_float(tf.placeholder(tf.int32, shape=[None]), name=mask_var_name)
+            mask_node = mask_node_placeholder
             output_node = output_nodes[var_name]
             output_rank = output_node.get_shape().ndims
             if output_rank == 1:
                 output_node = tf.tile(tf.expand_dims(output_node, 0), [tf.shape(data_node)[0], 1])
-                mask_node = tf.tile(tf.expand_dims(mask_node, 0), [tf.shape(data_node)[0], 1])
+                mask_node = tf.tile(tf.expand_dims(mask_node_placeholder, 0), [tf.shape(data_node)[0], 1])
             loss_node = self.tpt.observe(output_node, data_node, mask_node,
                                          scope="%s_observe" % var_name)
             output_datas[var_name] = data_node
-            output_masks[mask_var_name] = mask_node
+            output_mask_placeholders[mask_var_name] = mask_node_placeholder
             loss_nodes[var_name] = loss_node
-        return (output_datas, output_masks, loss_nodes)
+        return (output_datas, output_mask_placeholders, loss_nodes)
 
     def construct_loss(self, output_nodes):
         """
