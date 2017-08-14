@@ -325,6 +325,9 @@ def compile_sketch(model_filename, hypers_filename, data_filename,
     sketchtranslator = SketchTranslator()
     sketch = sketchtranslator.visit(parsed_model)
 
+    if not os.path.isdir(out_dir):
+        os.makedirs(out_dir)
+
     out_file_name = os.path.join(out_dir, out_name + ".sk")
     with open(out_file_name, "w") as out_file:
         out_file.write(sketch)
