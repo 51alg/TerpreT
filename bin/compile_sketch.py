@@ -25,6 +25,19 @@ class SketchTranslator(ast.NodeVisitor):
     def __init__(self):
         pass
 
+    def visit_list(self, nodes):
+        result = []
+        for value in nodes:
+            if isinstance(value, ast.AST):
+                value = self.visit(value)
+            if value is None:
+                pass
+            elif not isinstance(value, ast.AST):
+                result.extend(value)
+            else:
+                result.append(value)
+        return "".join(result)
+
     def indent(self, string):
         end = "\n" if string.endswith("\n") else ""
         return "\n".join("  " + line for line in string.rstrip().split("\n")) + end

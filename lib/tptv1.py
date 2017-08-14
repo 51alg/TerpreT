@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 import ast
 import copy
-import json
 import utils as u
+from unroller import subs, eval_const_expressions, flat_map
 from astunparse import unparse
 
 
@@ -20,24 +20,40 @@ def ast_uses_varset(root, varset):
     return vis.uses_varset
 
 
-def is_declaration(node, typ):
+def is_declaration_of_type(node, typ):
     if isinstance(node, ast.Subscript):
-        return is_declaration(node.value, typ)
+        return is_declaration_of_type(node.value, typ)
     if not isinstance(node, ast.Call): return False
     if not isinstance(node.func, ast.Name): return False
     return node.func.id == typ
 
 
 def is_input_declaration(node):
-    return is_declaration(node, "Input")
+    return is_declaration_of_type(node, "Input")
 
 
 def is_output_declaration(node):
-    return is_declaration(node, "Output")
+    return is_declaration_of_type(node, "Output")
 
 
 def is_var_declaration(node):
-    return is_declaration(node, "Var")
+    return is_declaration_of_type(node, "Var")
+
+
+def is_hyper_declaration(node):
+    return is_declaration_of_type(node, "Hyper")
+
+
+def is_param_declaration(node):
+    return is_declaration_of_type(node, "Param")
+
+
+def is_declaration(node):
+    if isinstance(node, ast.Subscript):
+        return is_declaration(node.value)
+    if not isinstance(node, ast.Call): return False
+    if not isinstance(node.func, ast.Name): return False
+    return node.func.id in ["Input", "Output", "Var", "Hyper", "Param"]
 
 
 def get_var_name(node):
@@ -136,8 +152,10 @@ def get_input_dependent_vars(root):
 
     return input_dependents
 
+
 def extend_subscript_for_input(node, extension):
     if isinstance(node.slice, ast.Index):
+        node = copy.deepcopy(node)
         idx = node.slice.value
         if isinstance(idx, ast.Tuple):
             new_idx = ast.Tuple([extension] + idx.elts, ast.Load())
@@ -197,8 +215,86 @@ def generate_io_stmt(input_idx, var_name, value, func_name):
                         [], None, None))]
 
 
+class AssignmentAndFunctionInliner(ast.NodeTransformer):
+    def __init__(self, environment={}, inlinable_functions={}):
+        # While I think Python's scoping rules are an abomination unto
+        # Nuggan, they do come handy here -- we don't need to worry
+        # about things coming in and going out of scope...
+        self.__environment = environment
+        self.__inlinable_functions = copy.copy(inlinable_functions)
+
+    def visit_FunctionDef(self, node):
+        # Record inlinable functions, and do not visit them:
+        if len(node.decorator_list) == 1 and node.decorator_list[0].func.id == "Inline":
+            self.__inlinable_functions[node.name] = node
+            return []
+        else:
+            # Spawn off sub-visitor initialised with current environment,
+            # but its own scope, and remove arguments:
+            subEnvironment = copy.copy(self.__environment)
+            for arg in node.args.args:
+                subEnvironment.pop(arg.id, None)
+            subVisitor = AssignmentAndFunctionInliner(subEnvironment, self.__inlinable_functions)
+            node = subVisitor.generic_visit(node)
+        return node
+
+    def visit_Call(self, node):
+        if isinstance(node.func, ast.Name):
+            function_name = node.func.id
+            if function_name in self.__inlinable_functions:
+                to_inline = self.__inlinable_functions[function_name]
+                fun_pars = to_inline.args.args
+                call_args = node.args
+
+                if len(fun_pars) != len(call_args):
+                    raise Exception("Trying to inline function %s with mismatching argument and parameter numbers." % (function_name))
+
+                instantiation = {}
+                for i in range(0, len(fun_pars)):
+                    instantiation[fun_pars[i].id] = self.visit(call_args[i])
+
+                inlined_stmts = []
+                for stmt in to_inline.body:
+                    instantiated_stmt = subs(stmt, **instantiation)
+                    instantiated_stmt = self.visit(instantiated_stmt)
+                    inlined_stmts.append(instantiated_stmt)
+
+                return inlined_stmts
+
+        return self.generic_visit(node)
+
+    def visit_Assign(self, assgn):
+        if len(assgn.targets) > 1:
+            raise Exception("Cannot process tuple assignment in %s" % assgn)
+        if not(isinstance(assgn.targets[0], ast.Name)):
+            assgn.targets[0] = self.visit(assgn.targets[0])
+        target = assgn.targets[0]
+        assgn.value = self.visit(assgn.value)
+        if isinstance(target, ast.Name) and not is_declaration(assgn.value):
+            self.__environment[target.id] = eval_const_expressions(assgn.value)
+            return []
+        return assgn
+
+    def visit_Name(self, node):
+        if node.id in self.__environment:
+            return copy.deepcopy(self.__environment[node.id])
+        else:
+            return node
+
+    def visit_If(self, node):
+        node.test = self.visit(node.test)
+        node = eval_const_expressions(node)
+        if not(isinstance(node, ast.If)):
+            if isinstance(node, list):
+                return flat_map(self.visit, node)
+            else:
+                return self.visit(node)
+        return self.generic_visit(node)
+
+
 def translate_to_tptv1(parsed_model, data_batch, hypers):
     parsed_model = u.replace_hypers(parsed_model, hypers)
+    parsed_model = AssignmentAndFunctionInliner().visit(parsed_model)
     input_dependents = get_input_dependent_vars(parsed_model)
 
     idx_var_name = "input_idx"
