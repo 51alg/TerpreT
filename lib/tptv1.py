@@ -185,7 +185,9 @@ def add_input_indices(root, input_vars, index_var):
 
 
 def generate_io_stmt(input_idx, var_name, value, func_name):
-    if isinstance(value, list):
+    if value is None:
+        return []
+    elif isinstance(value, list):
         return [ast.Expr(
                     ast.Call(
                         ast.Attribute(
@@ -200,7 +202,8 @@ def generate_io_stmt(input_idx, var_name, value, func_name):
                             ast.Load()),
                         [ast.Num(val)],
                         [], None, None))
-                for val_idx, val in enumerate(value)]
+                for val_idx, val in enumerate(value)
+                if val is not None]
     else:
         return [ast.Expr(
                     ast.Call(
